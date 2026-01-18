@@ -82,8 +82,10 @@ static int start_command(struct child_process *cmd)
 	return 0;
 }
 
-static int wait_or_whine(pid_t pid)
+static int finish_command(struct child_process *cmd)
 {
+	pid_t pid = cmd->pid;
+
 	for (;;) {
 		int status, code;
 		pid_t waiting = waitpid(pid, &status, 0);
@@ -110,11 +112,6 @@ static int wait_or_whine(pid_t pid)
 			return -1;
 		}
 	}
-}
-
-static int finish_command(struct child_process *cmd)
-{
-	return wait_or_whine(cmd->pid);
 }
 
 static void pager_preexec(void)
