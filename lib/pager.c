@@ -134,6 +134,18 @@ static void wait_for_pager(void)
 	/* signal EOF to pager */
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
+
+	/* restore original output */
+	fflush(NULL);
+	clearerr(stdout);
+	clearerr(stderr);
+
+	dup2(pager_process.org_out, STDOUT_FILENO);
+	dup2(pager_process.org_err, STDERR_FILENO);
+
+	close(pager_process.org_out);
+	close(pager_process.org_err);
+
 	finish_command(&pager_process);
 }
 
@@ -242,7 +254,7 @@ void pager_redirect(void)
 	if (pager_process.pid)
 		return;		/* already running */
 
-	__setup_pager();
+	pager_open();
 
 	atexit(wait_for_pager);
 }
@@ -268,17 +280,6 @@ void pager_close(void)
 		return;
 
 	wait_for_pager();
-
-	/* restore original output */
-	fflush(NULL);
-	clearerr(stdout);
-	clearerr(stderr);
-
-	dup2(pager_process.org_out, STDOUT_FILENO);
-	dup2(pager_process.org_err, STDERR_FILENO);
-
-	close(pager_process.org_out);
-	close(pager_process.org_err);
 
 	/* restore original signals setting */
 	sigaction(SIGINT,  &pager_process.orig_sigint, NULL);
