@@ -110,7 +110,7 @@ static int finish_command(struct child_process *cmd)
 		if (waiting < 0) {
 			if (errno == EINTR)
 				continue;
-			ul_sig_err(EXIT_FAILURE, "waitpid failed");
+			err(EXIT_FAILURE, "waitpid failed");
 		}
 		if (waiting != pid)
 			return -1;
@@ -147,13 +147,6 @@ static void wait_for_pager(void)
 	close(pager_process.org_err);
 
 	finish_command(&pager_process);
-}
-
-static void wait_for_pager_signal(int signo)
-{
-	UL_PROTECT_ERRNO;
-	wait_for_pager();
-	raise(signo);
 }
 
 static int has_command(const char *cmd)
@@ -237,7 +230,7 @@ static void __setup_pager(void)
 	close(pager_process.in);
 
 	memset(&sa, 0, sizeof(sa));
-	sa.sa_handler = wait_for_pager_signal;
+	sa.sa_handler = SIG_IGN;
 
 	/* this makes sure that the parent terminates after the pager */
 	sigaction(SIGINT,  &sa, &pager_process.orig_sigint);

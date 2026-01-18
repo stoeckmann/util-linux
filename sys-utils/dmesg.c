@@ -1358,7 +1358,7 @@ static void print_buffer(struct dmesg_control *ctl,
 		return;
 	}
 
-	while (get_next_syslog_record(ctl, &rec) == 0)
+	while (!ferror(stdout) && get_next_syslog_record(ctl, &rec) == 0)
 		print_record(ctl, &rec);
 }
 
@@ -1527,7 +1527,7 @@ static int process_kmsg(struct dmesg_control *ctl)
 	 */
 	sz = ctl->kmsg_first_read;
 
-	while (sz > 0) {
+	while (sz > 0 && !ferror(stdout)) {
 		*(ctl->kmsg_buf + sz) = '\0';	/* for debug messages */
 
 		if (parse_kmsg_record(ctl, &rec,
@@ -1554,7 +1554,7 @@ static int process_kmsg_file(struct dmesg_control *ctl, char **buf)
 	if (sz == -1)
 		return -1;
 
-	while (sz > 0) {
+	while (sz > 0 && !ferror(stdout)) {
 		len = strnlen(ctl->mmap_buff, sz);
 		if (len > sizeof(str))
 			errx(EXIT_FAILURE, _("record too large"));
