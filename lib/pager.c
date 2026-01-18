@@ -132,11 +132,11 @@ static void wait_for_pager(void)
 		return;
 
 	/* signal EOF to pager */
+	fflush(NULL);
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
 
 	/* restore original output */
-	fflush(NULL);
 	clearerr(stdout);
 	clearerr(stderr);
 
