@@ -214,9 +214,11 @@ static void __setup_pager(void)
 		return;
 
 	/* original process continues, but writes to the pipe */
+	clearerr(stdout);
 	dup2(pager_process.in, STDOUT_FILENO);
 	setvbuf(stdout, NULL, _IOLBF, 0);
 	if (isatty(STDERR_FILENO)) {
+		clearerr(stderr);
 		dup2(pager_process.in, STDERR_FILENO);
 		setvbuf(stderr, NULL, _IOLBF, 0);
 	}
@@ -268,6 +270,10 @@ void pager_close(void)
 	wait_for_pager();
 
 	/* restore original output */
+	fflush(NULL);
+	clearerr(stdout);
+	clearerr(stderr);
+
 	dup2(pager_process.org_out, STDOUT_FILENO);
 	dup2(pager_process.org_err, STDERR_FILENO);
 
