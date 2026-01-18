@@ -113,6 +113,8 @@ static int finish_command(struct child_process *cmd)
 				continue;
 			err(EXIT_FAILURE, "waitpid failed");
 		}
+		cmd->pid = 0;
+
 		if (waiting != pid)
 			return -1;
 		if (WIFSIGNALED(status))
