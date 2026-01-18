@@ -87,7 +87,7 @@ static int finish_command(struct child_process *cmd)
 	pid_t pid = cmd->pid;
 
 	for (;;) {
-		int status, code;
+		int status;
 		pid_t waiting = waitpid(pid, &status, 0);
 
 		if (waiting < 0) {
@@ -102,15 +102,10 @@ static int finish_command(struct child_process *cmd)
 
 		if (!WIFEXITED(status))
 			return -1;
-		code = WEXITSTATUS(status);
-		switch (code) {
-		case 127:
+
+		if (WEXITSTATUS(status))
 			return -1;
-		case 0:
-			return 0;
-		default:
-			return -1;
-		}
+		return 0;
 	}
 }
 
