@@ -37,6 +37,7 @@ struct child_process {
 
 	int org_err;
 	int org_out;
+	struct sigaction orig_sigchld;
 	struct sigaction orig_sigint;
 	struct sigaction orig_sighup;
 	struct sigaction orig_sigterm;
@@ -215,6 +216,11 @@ static void __setup_pager(void)
 	pager_process.argv = pager_argv;
 	pager_process.in = -1;
 
+	memset(&sa, 0, sizeof(sa));
+	sa.sa_handler = SIG_DFL;
+
+	sigaction(SIGCHLD,  &sa, &pager_process.orig_sigchld);
+
 	if (start_command(&pager_process))
 		return;
 
@@ -229,7 +235,6 @@ static void __setup_pager(void)
 	}
 	close(pager_process.in);
 
-	memset(&sa, 0, sizeof(sa));
 	sa.sa_handler = SIG_IGN;
 
 	/* this makes sure that the parent terminates after the pager */
@@ -275,6 +280,7 @@ void pager_close(void)
 	wait_for_pager();
 
 	/* restore original signals setting */
+	sigaction(SIGCHLD,  &pager_process.orig_sigchld, NULL);
 	sigaction(SIGINT,  &pager_process.orig_sigint, NULL);
 	sigaction(SIGHUP,  &pager_process.orig_sighup, NULL);
 	sigaction(SIGTERM, &pager_process.orig_sigterm, NULL);
