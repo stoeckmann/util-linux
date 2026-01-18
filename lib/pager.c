@@ -34,7 +34,6 @@ struct child_process {
 	const char **argv;
 	pid_t pid;
 	int in;
-	int out;
 	int err;
 
 	int org_err;
@@ -68,8 +67,6 @@ static int start_command(struct child_process *cmd)
 	need_in = !cmd->no_stdin && cmd->in < 0;
 	if (need_in) {
 		if (pipe(fdin) < 0) {
-			if (cmd->out > 0)
-				close(cmd->out);
 			return -1;
 		}
 		cmd->in = fdin[1];
