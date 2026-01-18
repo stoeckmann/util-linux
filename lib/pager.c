@@ -131,9 +131,6 @@ static int finish_command(struct child_process *cmd)
 
 static void wait_for_pager(void)
 {
-	if (pager_process.pid == 0)
-		return;
-
 	/* signal EOF to pager */
 	fflush(NULL);
 	close(STDOUT_FILENO);
@@ -256,7 +253,7 @@ void pager_redirect(void)
 
 	pager_open();
 
-	atexit(wait_for_pager);
+	atexit(pager_close);
 }
 
 /* Setup pager and redirect output, the pager may be closed by pager_close().
