@@ -121,7 +121,8 @@ static void pager_preexec(void)
 	FD_SET(STDIN_FILENO, &in);
 	ex = in;
 
-	select(STDIN_FILENO + 1, &in, NULL, &ex, NULL);
+	if (select(STDIN_FILENO + 1, &in, NULL, &ex, NULL) == -1)
+		warn(_("failed to monitor standard input"));
 
 	if (setenv("LESS", "FRSX", 0) != 0)
 		warn(_("failed to set the %s environment variable"), "LESS");
